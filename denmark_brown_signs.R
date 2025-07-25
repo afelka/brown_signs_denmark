@@ -97,7 +97,7 @@ for (i in seq_len(nrow(brown_signs))) {
   # Create label text
   label_text_left <- paste0(
     brown_signs$Attraction[i], "\n",
-    "from brown sign\n",
+    "from brown road sign\n",
     "Distance: ", round(distance_m / 1000, 2), " km\n",
     "Duration: ", round(duration_s / 60, 1), " min"
   )
@@ -109,14 +109,14 @@ for (i in seq_len(nrow(brown_signs))) {
   
   # Left text (top-left)
   text_point_left <- st_sf(
-    geometry = st_sfc(st_point(c(bbox["xmin"] + 0.5, bbox["ymax"] - 0.2))),
+    geometry = st_sfc(st_point(c(bbox["xmin"] + 1, bbox["ymax"] - 0.2))),
     crs = st_crs(denmark_mainland),
     label = label_text_left
   )
   
   # Right text (top-right)
   text_point_right <- st_sf(
-    geometry = st_sfc(st_point(c(bbox["xmax"] - 1.5, bbox["ymax"] - 0.2))),
+    geometry = st_sfc(st_point(c(bbox["xmax"] - 0.5, bbox["ymax"] - 0.2))),
     crs = st_crs(denmark_mainland),
     label = label_text_right
   )
@@ -124,6 +124,7 @@ for (i in seq_len(nrow(brown_signs))) {
   # Create route endpoints
   points_sf <- st_as_sf(data.frame(
     name = c("Actual Location", "Sign Location"),
+    color = c("red", "#660000"), 
     lon = c(actual_coords[1], sign_coords[1]),
     lat = c(actual_coords[2], sign_coords[2])
   ), coords = c("lon", "lat"), crs = 4326)
@@ -136,11 +137,11 @@ for (i in seq_len(nrow(brown_signs))) {
     tm_shape(route_sf) +
     tm_lines(col = "blue", lwd = 2) +
     tm_shape(points_sf) +
-    tm_symbols(col = "red", size = 0.2) + 
+    tm_symbols(col = "color", size = 0.2) +
     tm_shape(text_point_left) +
     tm_text("label", size = 0.7, just = c("left", "top")) +
     tm_shape(text_point_right) +
-    tm_text("label", size = 0.7, just = c("left", "top"))
+    tm_text("label", size = 0.7, just = c("left", "top")) 
   
   # Save map per attraction
   filename <- paste0("route_", i, ".png")
