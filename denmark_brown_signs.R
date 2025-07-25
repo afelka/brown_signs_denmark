@@ -45,7 +45,7 @@ denmark_roads <- st_intersection(denmark_roads_raw, denmark_mainland)
 
 denmark_roads <- st_transform(denmark_roads, crs = 4326)
 
-# Brown turist signs found (coordinates added by me) in https://www.vejdirektoratet.dk/side/turistoplysningstavler-paa-danske-motorveje
+# Brown tourist signs found (coordinates added by me) in https://www.vejdirektoratet.dk/side/turistoplysningstavler-paa-danske-motorveje
 brown_signs <- read_excel("brown_signs.xlsx")
 
 brown_signs <- brown_signs %>%
