@@ -5,3 +5,4 @@
 .env
 *.png
 *.Rproj
+!images/route_1.png
