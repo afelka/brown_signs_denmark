@@ -1,3 +1,4 @@
+# Load libraries
 library(readxl)
 library(dotenv)
 library(openrouteservice)
@@ -16,7 +17,8 @@ library(av)
 # Load environment variables from .env file
 dotenv::load_dot_env()
 
-# Read the ORS API key from the environment variable
+# Read the ORS API key from the environment variable 
+# (you need to use your own to be able to run rest of the code)
 ors_api_key(Sys.getenv("ORS_API_KEY"))
 
 # Get Denmark as sf polygon
@@ -32,26 +34,30 @@ denmark_mainland <- denmark %>%
 # Define Denmark bounding box
 den_bbox <- getbb("Denmark")
 
-# Download highway
+# Download highways
 denmark_roads_raw <- opq(bbox = den_bbox) %>%
   add_osm_feature(key = "highway", value = "motorway") %>%
   osmdata_sf() %>%
   .$osm_lines
 
-# Reproject Denmark polygon to match roads CRS
+# Re project Denmark polygon to match roads CRS
 denmark_mainland <- st_transform(denmark_mainland, st_crs(denmark_roads_raw))
 
 # Clip roads to the Denmark polygon
 denmark_roads <- st_intersection(denmark_roads_raw, denmark_mainland)
 
+# Re project roads
 denmark_roads <- st_transform(denmark_roads, crs = 4326)
 
-# Brown tourist signs found (coordinates added by me) in https://www.vejdirektoratet.dk/side/turistoplysningstavler-paa-danske-motorveje
+# Brown tourist signs found (coordinates added by me) 
+# in https://www.vejdirektoratet.dk/side/turistoplysningstavler-paa-danske-motorveje
 brown_signs <- read_excel("brown_signs.xlsx")
 
+# start from north 
 brown_signs <- brown_signs %>%
   arrange(desc(Actual_Latitude))
 
+# add empty columns to use later
 brown_signs$distance_km <- NA_real_
 brown_signs$duration_min <- NA_real_
 
@@ -59,12 +65,15 @@ brown_signs$duration_min <- NA_real_
 for (i in seq_len(nrow(brown_signs))) {
   message(paste("Processing:", brown_signs$Attraction[i]))
   
+# create attraction count and visited_count   
   attraction_count <- i
   visited_count <- sum(brown_signs$Visited[1:i])
   
+# coordinates of attraction and brown sign
   actual_coords <- c(brown_signs$Actual_Longitude[i], brown_signs$Actual_Latitude[i])
   sign_coords   <- c(brown_signs$Sign_Longitude[i], brown_signs$Sign_Latitude[i])
   
+# use openrouteservice to get route  
   route_raw <- tryCatch({
     ors_directions(
       coordinates = list(actual_coords, sign_coords),
@@ -125,7 +134,7 @@ for (i in seq_len(nrow(brown_signs))) {
   # Create route endpoints
   points_sf <- st_as_sf(data.frame(
     name = c("Actual Location", "Sign Location"),
-    color = c("red", "#660000"), 
+    color = c("red", "#660000"), # brown road sign's hex is #660000
     lon = c(actual_coords[1], sign_coords[1]),
     lat = c(actual_coords[2], sign_coords[2])
   ), coords = c("lon", "lat"), crs = 4326)
@@ -158,7 +167,7 @@ filenames <- list.files(
 # Extract the number after 'route_' and before '.png'
 numbers <- as.numeric(gsub("route_(\\d+)\\.png", "\\1", filenames))
 
-# Order filenames by extracted numeric part
+# Order filenames by extracted numeric part for correct animation
 filenames_sorted <- filenames[order(numbers)]
 
 # create animation
