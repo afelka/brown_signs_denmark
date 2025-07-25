@@ -11,6 +11,7 @@ library(rnaturalearthhires)
 library(jsonlite)
 library(osmdata)
 library(dplyr)
+library(av)
 
 # Load environment variables from .env file
 dotenv::load_dot_env()
@@ -147,3 +148,19 @@ for (i in seq_len(nrow(brown_signs))) {
   filename <- paste0("route_", i, ".png")
   tmap_save(brown_sign_map, filename = filename, width = 10, height = 8, units = "in", dpi = 300)
 }
+
+# using the animation method found here : https://stackoverflow.com/a/73376411/10710995
+filenames <- list.files(
+  pattern = "^route_.*\\.png$",
+  full.names = FALSE
+)
+
+# Extract the number after 'route_' and before '.png'
+numbers <- as.numeric(gsub("route_(\\d+)\\.png", "\\1", filenames))
+
+# Order filenames by extracted numeric part
+filenames_sorted <- filenames[order(numbers)]
+
+# create animation
+av::av_encode_video(filenames_sorted, framerate = 1,
+                    output = "brown_signs_denmark.mp4")
