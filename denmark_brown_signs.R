@@ -114,19 +114,19 @@ for (i in seq_len(nrow(brown_signs))) {
   
   label_text_right <- paste0(
     "Visited / Attraction\n",
-    visited_count, " / ", attraction_count
+    "        ", visited_count, " / ", attraction_count
   )
   
   # Left text (top-left)
   text_point_left <- st_sf(
-    geometry = st_sfc(st_point(c(bbox["xmin"] + 1, bbox["ymax"] - 0.2))),
+    geometry = st_sfc(st_point(c(den_bbox[1] + 1, den_bbox[4] - 0.3))),
     crs = st_crs(denmark_mainland),
     label = label_text_left
   )
   
   # Right text (top-right)
   text_point_right <- st_sf(
-    geometry = st_sfc(st_point(c(bbox["xmax"] - 0.5, bbox["ymax"] - 0.2))),
+    geometry = st_sfc(st_point(c(den_bbox[3] - 4, den_bbox[4] - 0.3))),
     crs = st_crs(denmark_mainland),
     label = label_text_right
   )
@@ -149,9 +149,9 @@ for (i in seq_len(nrow(brown_signs))) {
     tm_shape(points_sf) +
     tm_symbols(col = "color", size = 0.2) +
     tm_shape(text_point_left) +
-    tm_text("label", size = 0.7, just = c("left", "top")) +
+    tm_text("label", size = 0.7, options = opt_tm_text(just = c("left", "top"))) +
     tm_shape(text_point_right) +
-    tm_text("label", size = 0.7, just = c("left", "top")) 
+    tm_text("label", size = 0.7, options = opt_tm_text(just = c("left", "top"))) 
   
   # Save map per attraction
   filename <- paste0("route_", i, ".png")
